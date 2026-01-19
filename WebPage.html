@@ -1,0 +1,103 @@
+const char* htmlPage = R"rawliteral(
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Bin Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      color: #333;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .container {
+      padding: 30px 20px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+
+    #distance {
+      font-size: 20px;
+      margin-top: 30px;
+    }
+
+    #feedback {
+      margin-top: 15px;
+      font-size: 16px;
+      color: green;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Smart Waste Basket</h1>
+  </header>
+  <div class="container">
+    <button onclick="sendCommand('open')">Open Lid</button>
+    <button onclick="sendCommand('close')">Close Lid</button>
+    <div id="distance">Distance: -- cm</div>
+    <div id="feedback"></div>
+  </div>
+  <footer>
+    <p>Radiant Tech Ltd.</p>
+  </footer>
+
+  <script>
+    const socket = new WebSocket('ws://' + location.hostname + ':81');
+
+    socket.onmessage = function(event) {
+      const msg = event.data;
+
+      if (msg.startsWith("status:")) {
+        const status = msg.split(":")[1];
+        if (status === "open") {
+          document.getElementById("feedback").innerText = "Lid is open.";
+        } else if (status === "close") {
+          document.getElementById("feedback").innerText = "Lid is closed.";
+        }
+      } else {
+        document.getElementById("distance").innerText = 'Distance: ' + msg + ' cm';
+      }
+    };
+
+    function sendCommand(cmd) {
+      socket.send(cmd);
+    }
+  </script>
+</body>
+</html>
+)rawliteral";
